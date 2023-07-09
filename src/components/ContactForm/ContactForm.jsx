@@ -1,48 +1,55 @@
-import { useState} from 'react';
-import { useDispatch, useSelector } from "react-redux";
+import { useState } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
 import { nanoid } from 'nanoid';
-import { addContact } from 'redux/contactSlice';
-import { getContacts } from 'redux/selectors';
+import { addContact } from 'redux/operations';
+import { selectContacts } from 'redux/selectors';
 import Notiflix from 'notiflix';
 import css from './ContactForm.module.css';
 
 const ContactForm = () => {
-  const [name, setName] = useState('');
-  const [number, setNumber] = useState('');
-
   const dispatch = useDispatch();
 
-  const prevContacts = useSelector(getContacts);
+  const prevContacts = useSelector(selectContacts);
 
-  const nameChange = (e) => {
+  const [name, setName] = useState('');
+  const [phone, setPhone] = useState('');
+
+  const nameChange = e => {
     setName(e.target.value);
   };
 
-  const numberChange = (e) => {
-    setNumber(e.target.value);
+  const phoneChange = e => {
+    setPhone(e.target.value);
   };
 
   const reset = () => {
     setName('');
-    setNumber('');
+    setPhone('');
+  };
+
+  const findContactPhone = (contacts, number) => {
+    return contacts.find(
+      contact => contact.phone.replace(/[^\d]/g, '') === number
+    );
+  };
+
+  const findContactName = (contacts, name) => {
+    return contacts.find(contact => contact.name.toLowerCase() === name);
   };
 
   const handleSubmit = e => {
     e.preventDefault();
-    const onlyNumber = number.replace(/[^\d]/g, '');
-    const checkNumber = prevContacts.find(
-      contact => contact.number.replace(/[^\d]/g, '') === onlyNumber
-    );
+    const onlyNumber = phone.replace(/[^\d]/g, '');
+    const checkNumber = findContactPhone(prevContacts, onlyNumber);
     const lowerName = name.toLowerCase();
-    const checkName = prevContacts.find(
-      contact => contact.name.toLowerCase() === lowerName
-    );
-    if (checkNumber === undefined && checkName === undefined) {
-      dispatch(addContact(name, number))
-    } else if (checkName !== undefined) {
+    const checkName = findContactName(prevContacts, lowerName);
+    const contact = { name, phone };
+    if (!checkNumber && !checkName) {
+      dispatch(addContact(contact));
+    } else if (checkName) {
       Notiflix.Notify.info(`${name} is already in contacts.`);
-    } else if (checkNumber !== undefined) {
-      Notiflix.Notify.info(`${number} is already in contacts.`);
+    } else if (checkNumber) {
+      Notiflix.Notify.info(`${phone} is already in contacts.`);
     }
     reset();
   };
@@ -67,11 +74,11 @@ const ContactForm = () => {
       <input
         id={numberInputId}
         type="tel"
-        name="number"
-        value={number}
+        name="phone"
+        value={phone}
         pattern="\+?\d{1,4}?[-.\s]?\(?\d{1,3}?\)?[-.\s]?\d{1,4}[-.\s]?\d{1,4}[-.\s]?\d{1,9}"
         title="Phone number must be digits and can contain spaces, dashes, parentheses and can start with +"
-        onChange={numberChange}
+        onChange={phoneChange}
         required
       />
       <button className={css.formButton} type="submit">
@@ -82,4 +89,3 @@ const ContactForm = () => {
 };
 
 export default ContactForm;
-
