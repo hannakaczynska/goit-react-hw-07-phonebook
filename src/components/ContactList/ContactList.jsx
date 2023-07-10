@@ -1,5 +1,5 @@
 import { useDispatch, useSelector } from 'react-redux';
-import {selectFilteredContacts } from 'redux/selectors';
+import { selectFilteredContacts } from 'redux/selectors';
 import { deleteContact } from 'redux/operations';
 import { nanoid } from 'nanoid';
 import css from './ContactList.module.css';
@@ -37,5 +37,3 @@ const ContactList = () => {
 };
 
 export default ContactList;
-
-
